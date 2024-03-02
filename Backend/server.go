@@ -1,26 +1,48 @@
-package main 
+package main
 
 import (
-	"net/http"
-	"fmt"
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "log"
+    "net/http"
 )
 
-func set(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, fmt.Sprintf("state: %s", r.FormValue("state"))) 
+func writeState(w http.ResponseWriter, r *http.Request, data map[string]DeviceSettings) {
+    request = // TODO! 
 }
 
-func get(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, fmt.Sprintf("device id: %s", r.FormValue("deviceId")))
+func readState(w http.ResponseWriter, r *http.Request, data map[string]DeviceSettings) {
+	deviceId := r.URL.Query().Get("deviceId")
+	fmt.Fprintf(w, "Welcome to my website!")
+	fmt.Fprintf(w, "Read device id: %s", deviceId)
+}
+
+type DeviceSettings struct {
+	IsOn bool
+}
+
+type UpdateSync struct {
+	Key  string
+	Data DeviceSettings
 }
 
 func main() {
-    http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Welcome to my website!")
-    })
+	data := make(map[string]DeviceSettings)
 
-    http.HandleFunc("/set", set)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		deviceId := r.URL.Query().Get("deviceId")
+		fmt.Fprintf(w, "Welcome to my website!")
+		fmt.Fprintf(w, "Read device id: %s", deviceId)
+	})
 
-    http.HandleFunc("/get", get)
+	http.HandleFunc("/writeState", func(w http.ResponseWriter, r *http.Request) {
+		writeState(w, r, data)
+	})
 
-    http.ListenAndServe(":80", nil)
+	http.HandleFunc("/readState", func(w http.ResponseWriter, r *http.Request) {
+		readState(w, r, data)
+	})
+
+	http.ListenAndServe(":8080", nil)
 }
